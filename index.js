@@ -24,15 +24,11 @@ module.exports = async function () {
   for await (const repository of repositories) {
     /** @type {{ id: number; name: string; url: string; }[]} */
     const releases = [];
-    for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token })) {
+
+    // Take only the first page of the latest releases to avoid fetching them all
+    // Do not worry about missing releases - only if a the repo released 30+ in a day
+    for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
       releases.push({ id: release.id, name: release.name, url: release.html_url });
-      
-      // Take the top 20 new releases and ignore older releases so that we don't fetch all releases for all projects
-      // The releases are ordered newest to oldest, so we do not need to worry about missing a new release this way
-      // We will miss releases if a project has more than 20 releases in a single day, but that's a worthwhile tradeoff
-      if (releases.length === 20) {
-        break;
-      }
     }
 
     console.log(repository.full_name, releases.length, 'releases');

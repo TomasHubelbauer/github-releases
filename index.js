@@ -1,17 +1,7 @@
 const github = require('github-api');
 const fs = require('fs-extra');
-let email;
-let headers;
-try {
-  email = require('../self-email');
-  headers = require('../self-email/headers');
-}
-catch (error) {
-  // Ignore the mailer missing on this system
-}
-
-// Crash the process on an unhandled promise rejection
-process.on('unhandledRejection', error => { throw error; });
+const email = require('../self-email');
+const headers = require('../self-email/headers');
 
 module.exports = async function () {
   const token = process.argv[2] || process.env.GITHUB_TOKEN;

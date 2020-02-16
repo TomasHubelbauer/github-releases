@@ -10,18 +10,35 @@ module.exports = async function () {
     : github.getUsersUserStarred('TomasHubelbauer')
     ;
 
+  let count = '?';
+  try {
+    count = await fs.readJson('count.json');
+  }
+  catch (error) {
+    // Ignore no count stored yet
+  }
+
   const emailLines = [];
+  let counter = 0;
   for await (const repository of repositories) {
+    counter++;
+
     /** @type {{ id: number; name: string; url: string; }[]} */
     const releases = [];
 
     // Take only the first page of the latest releases to avoid fetching them all
     // Do not worry about missing releases - only if a the repo released 30+ in a day
-    for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
-      releases.push({ id: release.id, name: release.name, url: release.html_url });
+    try {
+      for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
+        releases.push({ id: release.id, name: release.name, url: release.html_url });
+      }
+    }
+    catch (error) {
+      // Handle things like DMCA etc. causing the call to error out
+      continue;
     }
 
-    console.log(repository.full_name, releases.length, 'releases');
+    console.log(`${counter}/${count}: ${repository.full_name} - ${releases.length} releases`);
     const path = `data/${repository.full_name}.json`;
 
     /** @type {{ id: number; name: string; url: string; }[]} */
@@ -47,6 +64,8 @@ module.exports = async function () {
     await fs.ensureFile(path);
     await fs.writeJson(path, releases, { spaces: 2 });
   }
+
+  await fs.writeJson('count.json', counter);
 
   if (emailLines.length > 0 && email) {
     const repositories = emailLines.filter(l => l.startsWith('<p><b>')).length;

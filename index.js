@@ -72,7 +72,7 @@ module.exports = async function () {
     const releases = emailLines.filter(l => l.startsWith('<li>')).length;
     await email(
       headers('GitHub Releases', `${releases} new releases across ${repositories} repositories`),
-      `<p>There are ${releases} across ${repositories} repositories:</p>`,
+      `<p>There are ${releases} new releases across ${repositories} repositories:</p>`,
       ...emailLines
     );
   }

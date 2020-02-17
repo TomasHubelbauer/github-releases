@@ -16,6 +16,22 @@ apply.
 
 ## To-Do
 
+### Parallelize the network calls
+
+Several of my other GitHub API based repositories already use this, so I can
+quickly adapt this: call the GitHub API for releases in bulks, where the
+network calls are parallel and so is the processing, bringing the overall
+run time down. This introduces a new parameter: the limit of maximal permitted
+concurrency. For now set at 10 or something, or maybe elect to run a study like
+one or two of my other repos do: set the level of parallelism at the current
+day of month number and store the times for each day number, in time revealing
+the average sweep spot where the given level of concurrency provides the optimal
+speed up.
+
+Also it might be worth-while to pull out the bulking logic and use it as a
+package in this and other repos where I've implemented the bulking. But it might
+be too trivial to be worth it.
+
 ### Consider limit-saving strategies
 
 **Pull all the repositories first and look at ones with known releases first**

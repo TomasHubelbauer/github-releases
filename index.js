@@ -30,7 +30,7 @@ module.exports = async function () {
     // Do not worry about missing releases - only if a the repo released 30+ in a day
     try {
       for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
-        releases.push({ id: release.id, name: release.name, url: release.html_url });
+        releases.push({ id: release.id, name: `${release.tag_name} ${release.name}`, url: release.html_url });
       }
     }
     catch (error) {

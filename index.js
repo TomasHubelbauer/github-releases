@@ -20,7 +20,8 @@ module.exports = async function () {
 
   const emailLines = [];
   let counter = 0;
-  for await (const repository of repositories) {
+  for await (const { starred_at, repo } of repositories) {
+    const starredAtDate = new Date(starred_at);
     counter++;
 
     /** @type {{ id: number; name: string; url: string; }[]} */
@@ -29,7 +30,14 @@ module.exports = async function () {
     // Take only the first page of the latest releases to avoid fetching them all
     // Do not worry about missing releases - only if a the repo released 30+ in a day
     try {
-      for await (const release of github.getReposOwnerRepoReleases(repository.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
+      for await (const release of github.getReposOwnerRepoReleases(repo.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
+        const publishedAtDate = new Date(release.published_at);
+
+        // Ignore releases made prior to starring the repository to avoid a barrage of old releases on the next run after starring
+        if (publishedAtDate < starredAtDate) {
+          continue;
+        }
+
         releases.push({ id: release.id, name: `${release.tag_name}${release.name ? ' ' + release.name : ''}`, url: release.html_url });
       }
     }
@@ -38,8 +46,8 @@ module.exports = async function () {
       continue;
     }
 
-    console.log(`${counter}/${count}: ${repository.full_name} - ${releases.length} releases`);
-    const path = `data/${repository.full_name}.json`;
+    console.log(`${counter}/${count}: ${repo.full_name} - ${releases.length} releases`);
+    const path = `data/${repo.full_name}.json`;
 
     /** @type {{ id: number; name: string; url: string; }[]} */
     let knownReleases = [];
@@ -52,7 +60,7 @@ module.exports = async function () {
 
     const newRepoReleases = releases.filter(r => !knownReleases.find(r2 => r2.id === r.id));
     if (newRepoReleases.length > 0) {
-      emailLines.push(`<p><b>${repository.full_name}</b></p>`);
+      emailLines.push(`<p><b>${repo.full_name}</b></p>`);
       emailLines.push('<ul>');
       for (const release of newRepoReleases) {
         emailLines.push(`<li><a href="${release.url}">${release.name}</a></li>`);

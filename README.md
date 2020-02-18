@@ -16,6 +16,16 @@ apply.
 
 ## To-Do
 
+### Store also the repository subscription date and report only releases after
+
+This is so that when staring a new repo, the latest 30 subscriptions that get
+fetched are not reported as new just because they are not known yet.
+
+Throw when the subscription check endpoint returns a 4040 (`null`) because it
+violates the invariant of when having watched a repo and it appearing in the
+watched repos list, it must also have a valid response to the subscription
+check.
+
 ### Parallelize the network calls
 
 Several of my other GitHub API based repositories already use this, so I can

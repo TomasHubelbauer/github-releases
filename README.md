@@ -16,6 +16,14 @@ apply.
 
 ## To-Do
 
+### Keep a last check time for each repository and update the email copy
+
+For each repo of the batch that was checked, read its last check date and
+find the oldest one. The range from then til now is the check range. In the
+email body, say "X releases across Y repositories since D" where D is the date.
+Since it is virtually always going to be either daily or hourly, add relative
+time formatting (yesterday at X, an hour ago, X hours ago, ...).
+
 ### Store also the repository subscription date and report only releases after
 
 This is so that when staring a new repo, the latest 30 subscriptions that get

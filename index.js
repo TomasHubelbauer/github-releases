@@ -60,10 +60,13 @@ module.exports = async function () {
 
     const newRepoReleases = releases.filter(r => !knownReleases.find(r2 => r2.id === r.id));
     if (newRepoReleases.length > 0) {
-      emailLines.push(`<p><b>${repo.full_name}</b></p>`);
+      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b></a></p>`);
+      emailLines.push(`<p>${repo.description}</p>`);
       emailLines.push('<ul>');
       for (const release of newRepoReleases) {
-        emailLines.push(`<li><a href="${release.url}">${release.name}</a></li>`);
+        emailLines.push('<li>');
+        emailLines.push(`<a href="${release.url}">${release.name}</a>`);
+        emailLines.push('<li>');
       }
 
       emailLines.push('</ul>');

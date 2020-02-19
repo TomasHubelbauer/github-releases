@@ -79,7 +79,8 @@ module.exports = async function () {
   await fs.writeJson('count.json', counter);
 
   if (emailLines.length > 0 && email) {
-    const repositories = emailLines.filter(l => l.startsWith('<p><b>')).length;
+    // TODO: Collect these upfront
+    const repositories = emailLines.filter(l => l.startsWith('<p><a')).length;
     const releases = emailLines.filter(l => l.startsWith('<li>')).length;
     await email(
       headers('GitHub Releases', `${releases} new releases across ${repositories} repositories`),

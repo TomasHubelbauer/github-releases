@@ -66,7 +66,14 @@ module.exports = async function () {
 
       emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b></a></p>`);
       if (repo.description) {
-        emailLines.push(`<p>${repo.description}</p>`);
+        emailLines.push(`<p>${repo.description} (${newRepoReleases.length})</p>`);
+      }
+
+      // Note that this only reports *Watch* and not *Watch Releases*
+      // TODO: Await GitHub support reply about API for "Watch Releases" subscriptions
+      const subscription = await github.getReposOwnerRepoSubscription(repo.full_name, token);
+      if (subscription.subscribed) {
+        emailLines.push(`<p><b>You are also watching this repository on GitHub.</b></p>`);
       }
 
       emailLines.push('<ul>');

@@ -16,6 +16,12 @@ apply.
 
 ## To-Do
 
+### Await GitHub support reply about API for "Watch Releases" subscriptions
+
+### Encode the email properly so that emoji shows up correctly
+
+### Convert shortcodes in the repository descriptions to emoji
+
 ### Keep a last check time for each repository and update the email copy
 
 For each repo of the batch that was checked, read its last check date and

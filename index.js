@@ -64,9 +64,9 @@ module.exports = async function () {
     if (newRepoReleases.length > 0) {
       repositoryCount++;
 
-      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b></a></p>`);
+      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b> (${newRepoReleases.length})</a></p>`);
       if (repo.description) {
-        emailLines.push(`<p>${repo.description} (${newRepoReleases.length})</p>`);
+        emailLines.push(`<p>${repo.description}</p>`);
       }
 
       // Note that this only reports *Watch* and not *Watch Releases*

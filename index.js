@@ -19,6 +19,8 @@ module.exports = async function () {
   }
 
   const emailLines = [];
+  let repositoryCount = 0;
+  let releaseCount = 0;
   let counter = 0;
   for await (const { starred_at, repo } of repositories) {
     const starredAtDate = new Date(starred_at);
@@ -60,10 +62,17 @@ module.exports = async function () {
 
     const newRepoReleases = releases.filter(r => !knownReleases.find(r2 => r2.id === r.id));
     if (newRepoReleases.length > 0) {
+      repositoryCount++;
+
       emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b></a></p>`);
-      emailLines.push(`<p>${repo.description}</p>`);
+      if (repo.description) {
+        emailLines.push(`<p>${repo.description}</p>`);
+      }
+
       emailLines.push('<ul>');
       for (const release of newRepoReleases) {
+        releaseCount++;
+
         emailLines.push('<li>');
         emailLines.push(`<a href="${release.url}">${release.name}</a>`);
         emailLines.push('</li>');
@@ -79,12 +88,9 @@ module.exports = async function () {
   await fs.writeJson('count.json', counter);
 
   if (emailLines.length > 0 && email) {
-    // TODO: Collect these upfront
-    const repositories = emailLines.filter(l => l.startsWith('<p><a')).length;
-    const releases = emailLines.filter(l => l.startsWith('<li>')).length;
     await email(
-      headers('GitHub Releases', `${releases} new releases across ${repositories} repositories`),
-      `<p>There are ${releases} new releases across ${repositories} repositories:</p>`,
+      headers('GitHub Releases', `${releaseCount} new releases across ${repositoryCount} repositories`),
+      `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
       ...emailLines
     );
   }

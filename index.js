@@ -66,7 +66,7 @@ module.exports = async function () {
       for (const release of newRepoReleases) {
         emailLines.push('<li>');
         emailLines.push(`<a href="${release.url}">${release.name}</a>`);
-        emailLines.push('<li>');
+        emailLines.push('</li>');
       }
 
       emailLines.push('</ul>');

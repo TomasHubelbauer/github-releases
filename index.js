@@ -26,7 +26,7 @@ module.exports = async function () {
     const starredAtDate = new Date(starred_at);
     counter++;
 
-    /** @type {{ id: number; name: string; url: string; }[]} */
+    /** @type {{ id: number; tag: string; name: string; url: string; }[]} */
     const releases = [];
 
     // Take only the first page of the latest releases to avoid fetching them all
@@ -40,7 +40,13 @@ module.exports = async function () {
           continue;
         }
 
-        releases.push({ id: release.id, name: `${release.tag_name}${release.name ? ' ' + release.name : ''}`, url: release.html_url });
+        let name = release.name || '';
+        const tag = release.tag_name;
+        if (name === tag || 'v' + name === tag) {
+          name = '';
+        }
+
+        releases.push({ id: release.id, tag, name, url: release.html_url });
       }
     }
     catch (error) {
@@ -81,7 +87,12 @@ module.exports = async function () {
         releaseCount++;
 
         emailLines.push('<li>');
-        emailLines.push(`<a href="${release.url}">${release.name}</a>`);
+        emailLines.push(`<a href="${release.url}">`);
+        emailLines.push(`<code>${release.tag}</code>`);
+        if (release.name) {
+          emailLines.push(' ' + release.name);
+        }
+        emailLines.push('</a>');
         emailLines.push('</li>');
       }
 

@@ -98,7 +98,8 @@ module.exports = async function () {
     await email(
       headers('GitHub Releases', `${releaseCount} new releases across ${repositoryCount} repositories`),
       `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
-      ...emailLines
+      ...emailLines,
+      'Thank you'
     );
   }
 };

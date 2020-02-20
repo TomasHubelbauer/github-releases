@@ -68,10 +68,3 @@ do those updating their stamps. On the next run, do another back based on the
 dates again. This will allow now using up all of the available rate limit (just
 the configured bunch) freeing up the rest to other scripts. It could be run
 hourly and always use say max 50 % of the hour's rate.
-
-### Implement a blocklist
-
-There are ridiculous things like the web platform tests (WPT) or Jackett which
-have just loads of releases it is worth ignoring them for the sake of saving the
-rate limit. Or maybe run them conditionally last, if there is still enough of 
-the limit left for us to be able to blow it.

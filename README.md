@@ -16,6 +16,8 @@ apply.
 
 ## To-Do
 
+### Consider scraping my repos watched for releases off GitHub until API'd
+
 ### Await GitHub support reply about API for "Watch Releases" subscriptions
 
 ### Encode the email properly so that emoji shows up correctly

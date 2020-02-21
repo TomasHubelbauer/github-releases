@@ -2,6 +2,7 @@ const github = require('github-api');
 const fs = require('fs-extra');
 const email = require('../self-email');
 const headers = require('../self-email/headers');
+const footer = require('../self-email/footer');
 
 module.exports = async function () {
   const token = process.argv[2] || process.env.GITHUB_TOKEN;
@@ -106,10 +107,10 @@ module.exports = async function () {
 
   if (emailLines.length > 0 && email) {
     await email(
-      headers('GitHub Releases', `${releaseCount} new releases across ${repositoryCount} repositories`),
+      headers(`${releaseCount} new releases across ${repositoryCount} repositories`, 'GitHub Releases'),
       `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
       ...emailLines,
-      'Thank you'
+      ...footer('GitHub Releases')
     );
   }
 };

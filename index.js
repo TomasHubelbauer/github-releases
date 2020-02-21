@@ -10,6 +10,7 @@ module.exports = async function () {
     : github.getUsersUserStarred('TomasHubelbauer')
     ;
 
+  // Load the approximate count of the releases for progress display purposes
   let count = '?';
   try {
     count = await fs.readJson('count.json');
@@ -18,25 +19,34 @@ module.exports = async function () {
     // Ignore no count stored yet
   }
 
+  // Calculate the cut-off date, all releases past this date are considered seen
+  let stamp = new Date();
+  try {
+    // Use the actual last report date if available
+    stamp = new Date(await fs.readFile('stamp.utc', { encoding: 'ascii' }));
+  }
+  catch (error) {
+    // Ignore no stamp stored yet
+  }
+
   const emailLines = [];
   let repositoryCount = 0;
   let releaseCount = 0;
   let counter = 0;
-  for await (const { starred_at, repo } of repositories) {
-    const starredAtDate = new Date(starred_at);
+  for await (const { repo } of repositories) {
     counter++;
 
     /** @type {{ id: number; tag: string; name: string; url: string; }[]} */
     const releases = [];
 
     // Take only the first page of the latest releases to avoid fetching them all
-    // Do not worry about missing releases - only if a the repo released 30+ in a day
+    // Do not worry about missing releases - only if a the repo released 100+ in a day
     try {
       for await (const release of github.getReposOwnerRepoReleases(repo.full_name, { token, pageLimit: 1, onPageChange: true, onLimitChange: true })) {
         const publishedAtDate = new Date(release.published_at);
 
-        // Ignore releases made prior to starring the repository to avoid a barrage of old releases on the next run after starring
-        if (publishedAtDate < starredAtDate) {
+        // Ignore releases made prior the last report (or current instant) to avoid barrages of old releases
+        if (publishedAtDate < stamp) {
           continue;
         }
 
@@ -54,36 +64,26 @@ module.exports = async function () {
       continue;
     }
 
-    console.log(`${counter}/${count}: ${repo.full_name} - ${releases.length} releases`);
+    console.log(`${counter}/${count}: ${repo.full_name} - ${releases.length} new releases`);
     const path = `data/${repo.full_name}.json`;
 
-    /** @type {{ id: number; name: string; url: string; }[]} */
-    let knownReleases = [];
-    try {
-      knownReleases = await fs.readJson(path);
-    }
-    catch (error) {
-      // Ignore no releases being known yet
-    }
-
-    const newRepoReleases = releases.filter(r => !knownReleases.find(r2 => r2.id === r.id));
-    if (newRepoReleases.length > 0) {
+    if (releases.length > 0) {
       repositoryCount++;
 
-      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b> (${newRepoReleases.length})</a></p>`);
+      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b> (${releases.length})</a></p>`);
       if (repo.description) {
         emailLines.push(`<p>${repo.description}</p>`);
       }
 
       // Note that this only reports *Watch* and not *Watch Releases*
-      // TODO: Await GitHub support reply about API for "Watch Releases" subscriptions
+      // TODO: Await GitHub API support for "Watch Releases" subscriptions
       const subscription = await github.getReposOwnerRepoSubscription(repo.full_name, token);
       if (subscription.subscribed) {
         emailLines.push(`<p><b>You are also watching this repository on GitHub.</b></p>`);
       }
 
       emailLines.push('<ul>');
-      for (const release of newRepoReleases) {
+      for (const release of releases) {
         releaseCount++;
 
         emailLines.push('<li>');
@@ -99,8 +99,7 @@ module.exports = async function () {
       emailLines.push('</ul>');
     }
 
-    await fs.ensureFile(path);
-    await fs.writeJson(path, releases, { spaces: 2 });
+    await fs.writeFile('stamp.utc', new Date());
   }
 
   await fs.writeJson('count.json', counter);

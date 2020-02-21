@@ -18,16 +18,13 @@ apply.
 
 ### Consider scraping my repos watched for releases off GitHub until API'd
 
-### Await GitHub support reply about API for "Watch Releases" subscriptions
-
 ### Encode the email properly so that emoji shows up correctly
 
 ### Convert shortcodes in the repository descriptions to emoji
 
-### Keep a last check time for each repository and update the email copy
+### Update the email copy to say the checked period
 
-For each repo of the batch that was checked, read its last check date and
-find the oldest one. The range from then til now is the check range. In the
+The range from the value of `stamp.utc` til now is the check range. In the
 email body, say "X releases across Y repositories since D" where D is the date.
 Since it is virtually always going to be either daily or hourly, add relative
 time formatting (yesterday at X, an hour ago, X hours ago, ...).

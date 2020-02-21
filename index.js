@@ -64,8 +64,8 @@ module.exports = async function () {
       continue;
     }
 
-    console.log(`${counter}/${count}: ${repo.full_name} - ${releases.length} new releases`);
-    const path = `data/${repo.full_name}.json`;
+    // Take the larger of the counter and the approximate count to account for more starred repos since the approximation
+    console.log(`${counter}/${Math.max(count, counter)}: ${repo.full_name} - ${releases.length} new releases`);
 
     if (releases.length > 0) {
       repositoryCount++;

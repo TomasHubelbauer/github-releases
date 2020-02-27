@@ -66,7 +66,7 @@ module.exports = async function () {
     }
 
     // Take the larger of the counter and the approximate count to account for more starred repos since the approximation
-    console.log(`${counter}/${Math.max(count, counter)}: ${repo.full_name} - ${releases.length} new releases`);
+    console.log(`${counter}/${Math.max(count, counter)}: ${repo.full_name} - ${releases.length} new releases since ${stamp.toISOString()}`);
 
     if (releases.length > 0) {
       repositoryCount++;

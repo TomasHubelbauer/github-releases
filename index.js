@@ -82,22 +82,21 @@ module.exports = async function () {
       if (subscription.subscribed) {
         emailLines.push(`<p><b>You are also watching this repository on GitHub.</b></p>`);
       }
-
-      emailLines.push('<ul>');
       for (const release of releases) {
         releaseCount++;
 
-        emailLines.push('<li>');
+        emailLines.push('<details>');
+        emailLines.push('<summary>');
         emailLines.push(`<a href="${release.url}">`);
         emailLines.push(`<code>${release.tag}</code>`);
         if (release.name) {
           emailLines.push(' ' + release.name);
         }
         emailLines.push('</a>');
-        emailLines.push('</li>');
+        emailLines.push('</summary>');
+        emailLines.push(release.body);
+        emailLines.push('</details>');
       }
-
-      emailLines.push('</ul>');
     }
 
     await fs.writeFile('stamp.utc', new Date());

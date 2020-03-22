@@ -1,8 +1,7 @@
 const github = require('github-api');
 const fs = require('fs-extra');
 const email = require('../self-email');
-const headers = require('../self-email/headers');
-const footer = require('../self-email/footer');
+const { eml, subject, sender, recipient } = require('../self-email');
 
 module.exports = async function () {
   const token = process.argv[2] || process.env.GITHUB_TOKEN;
@@ -106,10 +105,13 @@ module.exports = async function () {
 
   if (emailLines.length > 0 && email) {
     await email(
-      headers(`${releaseCount} new releases across ${repositoryCount} repositories`, 'GitHub Releases'),
-      `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
-      ...emailLines,
-      ...footer('GitHub Releases')
+      eml(
+        subject(`${releaseCount} new releases across ${repositoryCount} repositories`),
+        sender('GitHub Releases <bot+github@hubelbauer.net>'),
+        recipient('Tomas Hubelbauer <tomas@hubelbauer.net>'),
+        `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
+        ...emailLines,
+      )
     );
   }
 };

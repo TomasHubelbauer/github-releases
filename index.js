@@ -110,7 +110,7 @@ module.exports = async function () {
         sender('GitHub Releases <bot+github@hubelbauer.net>'),
         recipient('Tomas Hubelbauer <tomas@hubelbauer.net>'),
         `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
-        ...emailLines,
+        ...emailLines
       )
     );
   }

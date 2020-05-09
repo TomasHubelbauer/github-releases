@@ -116,4 +116,6 @@ module.exports = async function () {
   }
 };
 
-module.exports = module.exports();
+if (process.cwd() === __dirname) {
+  module.exports();
+}

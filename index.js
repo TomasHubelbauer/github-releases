@@ -1,5 +1,6 @@
 const github = require('github-api');
 const fs = require('fs-extra');
+const path = require('path');
 const email = require('../self-email');
 const { eml, subject, sender, recipient } = require('../self-email');
 
@@ -10,10 +11,13 @@ module.exports = async function () {
     : github.getUsersUserStarred('TomasHubelbauer')
     ;
 
+  const countJsonFilePath = path.join(__dirname, 'count.json');
+  const stampUtcFilePath = path.join(__dirname, 'stamp.utc');
+
   // Load the approximate count of the releases for progress display purposes
   let count = '?';
   try {
-    count = await fs.readJson('count.json');
+    count = await fs.readJson(countJsonFilePath);
   }
   catch (error) {
     // Ignore no count stored yet
@@ -23,7 +27,7 @@ module.exports = async function () {
   let stamp = new Date();
   try {
     // Use the actual last report date if available
-    stamp = new Date(await fs.readFile('stamp.utc', { encoding: 'ascii' }));
+    stamp = new Date(await fs.readFile(stampUtcFilePath, { encoding: 'ascii' }));
   }
   catch (error) {
     // Ignore no stamp stored yet
@@ -98,10 +102,10 @@ module.exports = async function () {
       }
     }
 
-    await fs.writeFile('stamp.utc', new Date());
+    await fs.writeFile(stampUtcFilePath, new Date());
   }
 
-  await fs.writeJson('count.json', counter);
+  await fs.writeJson(countJsonFilePath, counter);
 
   if (emailLines.length > 0 && email) {
     await email(
@@ -114,6 +118,8 @@ module.exports = async function () {
       )
     );
   }
+
+  return `There are ${releaseCount} new releases across ${repositoryCount} repositories.`;
 };
 
 if (process.cwd() === __dirname) {

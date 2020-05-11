@@ -1,8 +1,6 @@
 const github = require('github-api');
 const fs = require('fs-extra');
 const path = require('path');
-const email = require('../self-email');
-const { eml, subject, sender, recipient } = require('../self-email');
 
 module.exports = async function () {
   const token = process.argv[2] || process.env.GITHUB_TOKEN;
@@ -33,7 +31,7 @@ module.exports = async function () {
     // Ignore no stamp stored yet
   }
 
-  const emailLines = [];
+  const email = [];
   let repositoryCount = 0;
   let releaseCount = 0;
   let counter = 0;
@@ -74,31 +72,32 @@ module.exports = async function () {
     if (releases.length > 0) {
       repositoryCount++;
 
-      emailLines.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b> (${releases.length})</a></p>`);
+      email.push(`<p><a href="${repo.html_url}"><b>${repo.full_name}</b> (${releases.length})</a></p>`);
       if (repo.description) {
-        emailLines.push(`<p>${repo.description}</p>`);
+        email.push(`<p>${repo.description}</p>`);
       }
 
       // Note that this only reports *Watch* and not *Watch Releases*
       // TODO: Await GitHub API support for "Watch Releases" subscriptions
       const subscription = await github.getReposOwnerRepoSubscription(repo.full_name, token);
       if (subscription.subscribed) {
-        emailLines.push(`<p><b>You are also watching this repository on GitHub.</b></p>`);
+        email.push(`<p><b>You are also watching this repository on GitHub.</b></p>`);
       }
       for (const release of releases) {
         releaseCount++;
 
-        emailLines.push('<details>');
-        emailLines.push('<summary>');
-        emailLines.push(`<a href="${release.url}">`);
-        emailLines.push(`<code>${release.tag}</code>`);
+        email.push('<details>');
+        email.push('<summary>');
+        email.push(`<a href="${release.url}">`);
+        email.push(`<code>${release.tag}</code>`);
         if (release.name) {
-          emailLines.push(' ' + release.name);
+          email.push(' ' + release.name);
         }
-        emailLines.push('</a>');
-        emailLines.push('</summary>');
-        emailLines.push(release.body);
-        emailLines.push('</details>');
+
+        email.push('</a>');
+        email.push('</summary>');
+        email.push(release.body);
+        email.push('</details>');
       }
     }
 
@@ -107,21 +106,12 @@ module.exports = async function () {
 
   await fs.writeJson(countJsonFilePath, counter);
 
-  if (emailLines.length > 0 && email) {
-    await email(
-      eml(
-        subject(`${releaseCount} new releases across ${repositoryCount} repositories`),
-        sender('GitHub Releases <bot+github@hubelbauer.net>'),
-        recipient('Tomas Hubelbauer <tomas@hubelbauer.net>'),
-        `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
-        ...emailLines
-      )
-    );
-  }
-
-  return `There are ${releaseCount} new releases across ${repositoryCount} repositories.`;
+  return [
+    `<p>There are ${releaseCount} new releases across ${repositoryCount} repositories:</p>`,
+    ...email,
+  ];
 };
 
 if (process.cwd() === __dirname) {
-  module.exports();
+  module.exports().then(console.log);
 }
